@@ -4,10 +4,14 @@
 import json
 import re
 from scrapy import Spider, Request
-from Project.weibosraper.scraper.common import parse_tweet_info, parse_long_tweet
+from scraper.common import parse_tweet_info, parse_long_tweet
 import os
 from datetime import datetime,timedelta
 import time
+from mpi4py import MPI
+
+rank = MPI.COMM_WORLD.Get_rank()
+# rank = 0
 
 class SearchSpider(Spider):
     """
@@ -24,8 +28,8 @@ class SearchSpider(Spider):
         """
         with open("config.json",'r',encoding="utf-8") as f:
             config = json.load(f)
-        
-        self.keyword = config["keyword"]
+
+        self.keyword = config["keyword"][rank]
         self.start_time = datetime.strptime(config["start_time"],"%Y-%m-%d-%H")
         self.end_time = datetime.strptime(config["end_time"],"%Y-%m-%d-%H")
         self.hour_interval = config["hour_interval"]

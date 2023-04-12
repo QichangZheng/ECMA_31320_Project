@@ -3,3 +3,4 @@ numpy==1.14.5
 six==1.11.0
 scikit-learn==0.20.4
 sentencepiece==0.1.83
+spiders==0.1.1
