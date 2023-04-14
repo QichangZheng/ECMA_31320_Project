@@ -10,4 +10,4 @@
 module load python/anaconda-2021.05
 module load intelmpi/2018.2.199+intel-18.0
 
-mpirun -n 1 python3 Q1a.py > Q1a.out
+mpirun -n 121 python3 run_spider.py
