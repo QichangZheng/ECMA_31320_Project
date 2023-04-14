@@ -5,11 +5,15 @@ import json
 import re
 from scrapy import Spider, Request
 from scraper.common import parse_tweet_info, parse_long_tweet
+from process_keywords import extract_high_score_keywords
 import os
 from datetime import datetime,timedelta
 import time
 from mpi4py import MPI
 
+file = 'KWS/2022-04-25.json'
+dt = file.split('/')[-1].split('.')[0] + '-0'
+keywords = extract_high_score_keywords(file, 0.7)
 rank = MPI.COMM_WORLD.Get_rank()
 # rank = 0
 
@@ -29,9 +33,14 @@ class SearchSpider(Spider):
         with open("config.json",'r',encoding="utf-8") as f:
             config = json.load(f)
 
-        self.keyword = config["keyword"][rank]
-        self.start_time = datetime.strptime(config["start_time"],"%Y-%m-%d-%H")
-        self.end_time = datetime.strptime(config["end_time"],"%Y-%m-%d-%H")
+        # with open('KWS/2022-03-28.json', 'r') as f:
+        #     keywords = f.read().splitlines()
+
+        self.keyword = keywords[rank]
+        # self.start_time = datetime.strptime(config["start_time"],"%Y-%m-%d-%H")
+        # self.end_time = datetime.strptime(config["end_time"],"%Y-%m-%d-%H")
+        self.start_time = datetime.strptime(dt,"%Y-%m-%d-%H")
+        self.end_time = self.start_time + timedelta(days=1)
         self.hour_interval = config["hour_interval"]
         search_with_time_scope = config["search_with_time_scope"]  
         sort_by_hot = config["sort_by_hot"]  
@@ -77,6 +86,9 @@ class SearchSpider(Spider):
         Output: item
         """
         data = json.loads(response.text)
+        # save the response to file
+        # with open("response.txt",'w',encoding="utf-8") as f:
+        #     f.write(response.text)
         item = parse_tweet_info(data)
         if item['isLongText']:
             url = "https://weibo.com/ajax/statuses/longtext?id=" + item['mblogid']

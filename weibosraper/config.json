@@ -1,7 +1,7 @@
 {
     "keyword":["北京", "上海"],
-    "start_time":"2021-01-01-0",
-    "end_time":"2022-12-17-0",
+    "start_time":"2022-04-25-0",
+    "end_time":"2022-04-26-0",
     "search_with_time_scope": true,
     "sort_by_hot": false,
     "hour_interval": 1 
