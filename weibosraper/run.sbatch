@@ -3,7 +3,7 @@
 #SBATCH --job-name=crawler
 #SBATCH --output=crawler.out
 #SBATCH --ntasks=121
-#SBATCH --nodes=10
+#SBATCH --nodes=50
 #SBATCH --partition=broadwl
 #SBATCH --constraint=fdr
 #SBATCH --account=macs30123
