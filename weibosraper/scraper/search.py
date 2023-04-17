@@ -3,6 +3,7 @@
 
 import json
 import re
+import sys
 from scrapy import Spider, Request
 from scraper.common import parse_tweet_info, parse_long_tweet
 from process_keywords import extract_high_score_keywords
@@ -11,10 +12,21 @@ from datetime import datetime,timedelta
 import time
 from mpi4py import MPI
 
-file = 'KWS/2022-04-25.json'
+pre = 0
+if len(sys.argv) > 1:
+    start_date = sys.argv[1]
+    passed = int(sys.argv[2])
+    pre = int(sys.argv[3])
+    # pre = int(sys.argv[1])
+
+curr = datetime.strptime(start_date, '%Y-%m-%d') + timedelta(days=passed)
+file = os.path.join('KWS', curr.strftime('%Y-%m-%d') + '.csv')
+
+# file = 'KWS/2022-04-26.csv'
+
 dt = file.split('/')[-1].split('.')[0] + '-0'
-keywords = extract_high_score_keywords(file, 0.7)
-rank = MPI.COMM_WORLD.Get_rank()
+keywords = extract_high_score_keywords(file, 10)
+
 # rank = 0
 
 class SearchSpider(Spider):
@@ -33,6 +45,7 @@ class SearchSpider(Spider):
         with open("config.json",'r',encoding="utf-8") as f:
             config = json.load(f)
 
+        rank = MPI.COMM_WORLD.Get_rank() + 2 * pre
         # with open('KWS/2022-03-28.json', 'r') as f:
         #     keywords = f.read().splitlines()
 

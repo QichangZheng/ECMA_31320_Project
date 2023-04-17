@@ -3,7 +3,16 @@ import datetime
 import json
 import os.path
 import time
-filename = './output/2022-04-25'
+import sys
+
+if len(sys.argv) > 1:
+    start_date = sys.argv[1]
+    passed = int(sys.argv[2])
+
+curr = datetime.datetime.strptime(start_date, '%Y-%m-%d') + datetime.timedelta(days=passed)
+filename = os.path.join('output', curr.strftime('%Y-%m-%d'))
+
+# filename = './output/2022-04-26'
 
 class JsonWriterPipeline(object):
     """

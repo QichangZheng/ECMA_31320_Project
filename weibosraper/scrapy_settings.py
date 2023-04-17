@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-
+import mpi4py
+rank = mpi4py.MPI.COMM_WORLD.Get_rank()
+# rank = MPI.COMM_WORLD.Get_rank()
+rank = 0
 BOT_NAME = 'spider'
 
 SPIDER_MODULES = ['spider']
@@ -7,10 +10,15 @@ NEWSPIDER_MODULE = 'spider'
 
 ROBOTSTXT_OBEY = False
 
-with open('./cookie.txt', 'rt', encoding='utf-8') as f:
-    cookie = f.read().strip()
+
+
+with open('./cookies.txt', 'rt', encoding='utf-8') as f:
+    # cookie = f.read().strip()
+    cookie = f.readlines()[rank].strip()
+with open('./agents.txt', 'rt', encoding='utf-8') as f:
+    user_agent = f.readlines()[rank].strip()
 DEFAULT_REQUEST_HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:61.0) Gecko/20100101 Firefox/61.0',
+    'User-Agent': user_agent,
     'Cookie': cookie
 }
 

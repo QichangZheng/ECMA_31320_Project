@@ -8,7 +8,22 @@
 #SBATCH --constraint=fdr
 #SBATCH --account=macs30123
 
-module load python/anaconda-2021.05
-module load intelmpi/2018.2.199+intel-18.0
+#module load python/anaconda-2021.05
+#module load intelmpi/2018.2.199+intel-18.0
 
-mpirun -n 121 python3 run_spider.py
+#for i in {2..4}
+#do
+#    mpirun -n 2 python3 run_spider.py $i &
+#    pid=$!
+#    wait $pid
+#done
+
+for d in {0..9}
+do
+#    for i in {0..4}
+#    do
+        mpirun -n 2 python3 run_spider.py 2022-04-16 $d &
+        pid=$!
+        wait $pid
+#    done
+done

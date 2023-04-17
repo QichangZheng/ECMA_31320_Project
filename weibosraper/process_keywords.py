@@ -4,6 +4,7 @@ import re
 import csv
 from datetime import datetime, timedelta
 from transformers import pipeline
+import pandas as pd
 
 
 def process_json_files(start_date_str, end_date_str, input_folder, output_folder):
@@ -48,5 +49,14 @@ def process_json_files(start_date_str, end_date_str, input_folder, output_folder
             print(f"File {file_name} not found. Skipping.")
             continue
 
+def extract_high_score_keywords(csv_file, k=10):
+    df = pd.read_csv(csv_file)
+    df = df.sort_values(by='score', ascending=False)
+    high_score_keywords = df['keywords'][:k].tolist()
+
+    return high_score_keywords
+
 # 调用函数处理指定日期范围内的 .json 文件
-process_json_files('2022-03-28', '2022-05-28', 'Keywords/weibo-trending-hot-search/raw', 'KWS')
+if __name__ == '__main__':
+    process_json_files('2022-03-28', '2022-05-28', 'Keywords/weibo-trending-hot-search/raw', 'KWS')
+# process_json_files('2022-03-28', '2022-05-28', 'Keywords/weibo-trending-hot-search/raw', 'KWS')
