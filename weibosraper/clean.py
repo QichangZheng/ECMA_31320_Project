@@ -40,38 +40,42 @@ def jsonl_to_csv(directory_path=None, folder_path=None):
         raise ValueError("Either directory_path or folder_path must be provided.")
 
 def process_folder(folder_path, end='.jsonl'):
-    # 遍历文件夹中的所有jsonl文件
-    for file_name in os.listdir(folder_path):
-        if file_name.endswith(end):
-            # 构建文件路径
-            file_path = os.path.join(folder_path, file_name)
+    try:
+        # 遍历文件夹中的所有jsonl文件
+        for file_name in os.listdir(folder_path):
+            if file_name.endswith(end):
+                # 构建文件路径
+                file_path = os.path.join(folder_path, file_name)
 
-            filename = os.path.splitext(file_name)[0]
-            # 检查csv文件是否已经存在
-            csv_file_path = os.path.join(folder_path, filename + '.csv')
-            if os.path.exists(csv_file_path):
-                print(f"{csv_file_path} already exists. Skipping...")
-                continue
+                filename = os.path.splitext(file_name)[0]
+                # 检查csv文件是否已经存在
+                csv_file_path = os.path.join(folder_path, filename + '.csv')
+                if os.path.exists(csv_file_path):
+                    print(f"{csv_file_path} already exists. Skipping...")
+                    continue
 
-            # 读取jsonl文件
-            data = []
-            with open(file_path, 'r', encoding='utf-8') as f:
-                for line in f.readlines():
-                    record = json.loads(line, object_pairs_hook=OrderedDict)
-                    record['content'] = record['content'].replace(f'#{filename}#', '')
-                    data.append(record)
+                # 读取jsonl文件
+                data = []
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    for line in f.readlines():
+                        record = json.loads(line, object_pairs_hook=OrderedDict)
+                        record['content'] = record['content'].replace(f'#{filename}#', '')
+                        data.append(record)
 
-            # 将数据转换为pandas DataFrame格式
-            df = pd.DataFrame(data).loc[:, ['ip_location', 'content']]
-            df['contained_keywords'] = df['content'].apply(lambda x: find_keywords(x, regions))
-            df['has_keyword'] = df['contained_keywords'].apply(lambda x: bool(len(x) > 0))
-            negative_score = []
-            for text in tqdm(df['content'], colour='green'):
-                negative_score.append(get_negative_sentiment_score(text, nlp))
-            df['negative_sentiment_score'] = negative_score
+                # 将数据转换为pandas DataFrame格式
+                df = pd.DataFrame(data).loc[:, ['ip_location', 'content']]
+                df['contained_keywords'] = df['content'].apply(lambda x: find_keywords(x, regions))
+                df['has_keyword'] = df['contained_keywords'].apply(lambda x: bool(len(x) > 0))
+                negative_score = []
+                for text in tqdm(df['content'], colour='green'):
+                    negative_score.append(get_negative_sentiment_score(text, nlp))
+                df['negative_sentiment_score'] = negative_score
 
-            # 将DataFrame导出为csv文件
-            df.to_csv(csv_file_path, index=False, encoding='utf-8')
+                # 将DataFrame导出为csv文件
+                df.to_csv(csv_file_path, index=False, encoding='utf-8')
+    except:
+        print(f"{folder_path} does not exist")
+    print(f"Finished processing {folder_path}")
 
 start_date = '2022-04-25'
 if len(sys.argv) > 1:
