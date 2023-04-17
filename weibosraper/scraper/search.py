@@ -16,7 +16,10 @@ pre = 0
 if len(sys.argv) > 1:
     start_date = sys.argv[1]
     passed = int(sys.argv[2])
-    pre = int(sys.argv[3])
+    try:
+        pre = int(sys.argv[3])
+    except:
+        pass
     # pre = int(sys.argv[1])
 
 curr = datetime.strptime(start_date, '%Y-%m-%d') + timedelta(days=passed)
