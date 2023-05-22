@@ -28,7 +28,7 @@ file = os.path.join('KWS', curr.strftime('%Y-%m-%d') + '.csv')
 # file = 'KWS/2022-04-26.csv'
 
 dt = file.split('/')[-1].split('.')[0] + '-0'
-keywords = extract_high_score_keywords(file, 10)
+keywords = extract_high_score_keywords(file)
 
 # rank = 0
 

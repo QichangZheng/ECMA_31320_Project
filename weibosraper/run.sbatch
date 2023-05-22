@@ -17,11 +17,11 @@
 #    wait $pid
 #done
 
-for d in {0..8}
+for d in {0..0}
 do
     for i in {0..4}
     do
-        mpirun -n 2 python3 run_spider.py 2022-04-17 $d &
+        mpirun -n 2 python3 run_spider.py 2022-05-09 $d $i &
         pid=$!
         wait $pid
     done

@@ -23,7 +23,7 @@ def find_keywords(text, keywords_set):
 def get_negative_sentiment_score(text, nlp):
     try:
         result = nlp(text)
-        negative_sentiment = result[0]['score'] if result[0]['label'] == 'negative' else 1 - result[0]['score']
+        negative_sentiment = result[0]['score'] if result[0]['label'] == 'negative (stars 1, 2 and 3)' else 1 - result[0]['score']
     except:
         negative_sentiment = 'NA'
     return negative_sentiment
@@ -40,7 +40,7 @@ def jsonl_to_csv(directory_path=None, folder_path=None):
         raise ValueError("Either directory_path or folder_path must be provided.")
 
 def process_folder(folder_path, end='.jsonl'):
-    try:
+    if os.path.exists(folder_path):
         # 遍历文件夹中的所有jsonl文件
         for file_name in os.listdir(folder_path):
             if file_name.endswith(end):
@@ -56,6 +56,7 @@ def process_folder(folder_path, end='.jsonl'):
 
                 # 读取jsonl文件
                 data = []
+                # print(file_path)
                 with open(file_path, 'r', encoding='utf-8') as f:
                     for line in f.readlines():
                         record = json.loads(line, object_pairs_hook=OrderedDict)
@@ -73,7 +74,7 @@ def process_folder(folder_path, end='.jsonl'):
 
                 # 将DataFrame导出为csv文件
                 df.to_csv(csv_file_path, index=False, encoding='utf-8')
-    except:
+    else:
         print(f"{folder_path} does not exist")
     print(f"Finished processing {folder_path}")
 

@@ -1,6 +1,9 @@
-nltk==3.4.5
-numpy==1.14.5
-six==1.11.0
-scikit-learn==0.20.4
-sentencepiece==0.1.83
-spiders==0.1.1
+mpi4py==3.1.4
+pandas==2.0.0
+pypinyin==0.48.0
+python_dateutil==2.8.2
+Requests==2.30.0
+Scrapy==2.8.0
+setuptools==65.6.3
+tqdm==4.65.0
+transformers==4.24.0

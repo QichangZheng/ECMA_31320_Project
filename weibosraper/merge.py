@@ -19,59 +19,47 @@ def process_region(region):
     region_list = eval(region)
     return convert_to_pinyin(region_list)
 
-import os
-import pandas as pd
-from pypinyin import pinyin, Style
-
-# ...
+def extract_location(ip_location):
+    if pd.isnull(ip_location):
+        return ""
+    location = ip_location.split(' ')[-1]
+    return convert_to_pinyin([location])[0]
 
 def merge_csv_files(root_folder, output_file):
-    # 初始化一个空的DataFrame，用于存储合并后的数据
-    merged_data = pd.DataFrame(columns=["date", "file_name", "contains_keyword", "region", "region_info", "score"])
+    merged_data = pd.DataFrame(columns=["date", "keyword", "contains_keyword", "ip_loc", "region", "region_info", "score"])
 
-    # 遍历文件夹中的所有子文件夹
     for folder in os.listdir(root_folder):
         folder_path = os.path.join(root_folder, folder)
 
-        # 检查是否为文件夹
         if os.path.isdir(folder_path):
-            # 遍历文件夹中的所有文件
             for file in os.listdir(folder_path):
                 file_path = os.path.join(folder_path, file)
 
-                # 检查是否为csv文件
                 if file_path.endswith(".csv"):
-                    # 读取csv文件
                     data = pd.read_csv(file_path)
 
-                    # 提取csv文件中的第3、4、5列（使用索引2、3、4）
-                    extracted_data = data.iloc[:, [2, 3, 4]].copy()
+                    extracted_data = data.iloc[:, [0, 2, 3, 4]].copy()
 
-                    # 修改提取出的数据的列名以匹配最终的合并数据的列名
-                    extracted_data.columns = ["region", "region_info", "score"]
+                    extracted_data.columns = ["ip_loc", "region", "region_info", "score"]
 
-                    # 对地区名进行转换
                     extracted_data['region'] = extracted_data['region'].apply(process_region)
 
-                    # 将文件夹名称添加为新的一列，并将其放在第一列的位置
+                    # 在这里处理 'ip_loc' 列，将其转化为拼音
+                    extracted_data['ip_loc'] = extracted_data['ip_loc'].apply(extract_location)
+
                     extracted_data.insert(0, "date", folder)
 
-                    # 插入包含文件名的新列到第二列
-                    extracted_data.insert(1, "file_name", file)
+                    # 修改此处，将文件名去掉后缀并插入到第二列
+                    extracted_data.insert(1, "keyword", file[:-4])
 
-                    # 检查文件名是否包含关键词
                     file_contains_keyword = contains_keyword(file, regions)
                     extracted_data.insert(2, "contains_keyword", file_contains_keyword)
 
-                    # 将提取到的数据追加到合并后的数据中
                     merged_data = pd.concat([merged_data, extracted_data], ignore_index=True)
 
-    # 保存合并后的数据到csv文件中
     merged_data.to_csv(output_file, index=False)
 
 if __name__ == "__main__":
     root_folder = "output"
     output_file = "merged_data.csv"
     merge_csv_files(root_folder, output_file)
-
-

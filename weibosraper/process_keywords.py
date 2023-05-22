@@ -9,7 +9,7 @@ import pandas as pd
 
 def process_json_files(start_date_str, end_date_str, input_folder, output_folder):
     # 创建情感分析 pipeline
-    model_name = 'liam168/c2-roberta-base-finetuned-dianping-chinese'
+    model_name = 'uer/roberta-base-finetuned-jd-binary-chinese'
     nlp = pipeline('sentiment-analysis', model=model_name)
 
     # 将日期字符串转换为 datetime 对象
@@ -35,7 +35,7 @@ def process_json_files(start_date_str, end_date_str, input_folder, output_folder
             for keyword in keywords:
                 result = nlp(keyword)
                 negative_sentiment_score = result[0]['score'] \
-                    if result[0]['label'] == 'negative' else 1 - result[0]['score']
+                    if result[0]['label'] == 'negative (stars 1, 2 and 3)' else 1 - result[0]['score']
                 negative_sentiment_scores.append((keyword, negative_sentiment_score))
 
             # 将结果保存到相应的 .csv 文件
@@ -49,14 +49,14 @@ def process_json_files(start_date_str, end_date_str, input_folder, output_folder
             print(f"File {file_name} not found. Skipping.")
             continue
 
-def extract_high_score_keywords(csv_file, k=10):
+def extract_high_score_keywords(csv_file):
     df = pd.read_csv(csv_file)
     df = df.sort_values(by='score', ascending=False)
-    high_score_keywords = df['keywords'][:k].tolist()
+    high_score_keywords = df['keywords'].tolist()
 
     return high_score_keywords
 
 # 调用函数处理指定日期范围内的 .json 文件
 if __name__ == '__main__':
-    process_json_files('2022-03-28', '2022-05-28', 'Keywords/weibo-trending-hot-search/raw', 'KWS')
+    process_json_files('2023-04-01', '2023-04-30', '../weibo-trending-hot-search/raw', 'KWS')
 # process_json_files('2022-03-28', '2022-05-28', 'Keywords/weibo-trending-hot-search/raw', 'KWS')
