@@ -6,11 +6,11 @@ library(fixest)
 library(lfe)
 library(data.table)
 
+## Load data
 
+df <- read_csv("merged_data_0508.csv")
 
-df <- read_csv("D:/ecma31320/merged_data_0508.csv")
-
-sumdf <- read_csv("D:/ecma31320/summary.csv")
+sumdf <- read_csv("summary.csv")
 
 df4 <- inner_join(sumdf, df)
 
