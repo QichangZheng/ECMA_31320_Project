@@ -12,7 +12,7 @@ df <- read_csv("merged_data_0508.csv")
 
 sumdf <- read_csv("summary.csv")
 
-df4 <- inner_join(sumdf, df)
+df_with_control <- inner_join(sumdf, df)
 
 
 df2 <- df %>%
@@ -28,7 +28,7 @@ keywords <- df2 %>%
 df2_cut <- df2 %>%
   inner_join(keywords)
 
-df3 <- df4 %>%
+df3 <- df %>%
   filter(date < ymd("2022-04-29") | date > ymd("2022-05-31"))%>%
   mutate(post = ifelse(date >ymd("2022-04-28"),1,0),
          no_regional_info = ifelse(region_info,0,1))
@@ -350,7 +350,27 @@ ggsave("D:/ecma31320/y_mean_sentiment.png", plot=p2, width = 8, height = 6)
 
 
 
+### RD: examine the general trend
+df <- read_csv("merged_data0524.csv")
+
+df_day <- df %>%
+  filter(date == ymd("2022-04-28")) %>%
+  mutate(ip_revealed = ifelse(is.na(ip_loc),0,1))
+  
+
+df_day%>%
+  group_by(ip_revealed)%>%
+  summarise(ct=n())
 
 
+df_week <- df %>%
+  filter(date > ymd("2022-04-20") & date < ymd("2022-05-06"))%>%
+  mutate(after = ifelse(date >=ymd("2022-04-28"),1,0))
+
+mod_rd1 <- lm(score ~ ip_revealed, data = df_day)
+summary(mod_rd1)
+
+mod_rd2 <- lm(score ~ after, data = df_week)
+summary(mod_rd2)
 
 

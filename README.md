@@ -1,8 +1,8 @@
 # Project
 
-## The code needed for the econometric analysis is an Rscript named ``did_apr_may.R''. 
+## The code needed for the econometric analysis is an Rscript named ``main_regression.R''. 
 
-## The steps below introduces the procedure to collect data from scraping Weibo and to process data into an analyzable data set. The scraping process can be very time-consuming, so we recommend diretly running the Rscript mentioned above to see the graphic and regression results.
+## The steps below introduces the procedure to collect data from scraping Weibo and to process data into an analyzable data set. The scraping process can be very time-consuming, so we recommend directly running the Rscript mentioned above to see the graphic and regression results.
 
 ## Step 1: Configuration
 ### Install the required packages
