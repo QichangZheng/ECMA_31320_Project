@@ -131,6 +131,58 @@ stargazer(mod01, mod03, mod02, mod04, title="Regression Results",
 
 
 ############## 
-## PART III: Homophily
+## PART III: Robustness checks
 ##############
 
+# rdd placebo test
+
+df_week2 <- df %>%
+  filter(date > ymd("2022-04-29") & date < ymd("2022-05-14"))%>%
+  mutate(after = ifelse(date > ymd("2022-05-06"),1,0),
+         days_away = as.numeric(date - ymd("2022-05-06")))
+
+
+df_week3 <- df %>%
+  filter(date > ymd("2023-04-15") & date < ymd("2023-04-30"))%>%
+  mutate(after = ifelse(date > ymd("2023-04-22"),1,0),
+         days_away = as.numeric(date - ymd("2023-04-22")))
+mod_rd21 <- lm(score ~ after + days_away, data = df_week2)
+summary(mod_rd21)
+
+mod_rd22 <- lm(score ~ after + days_away + I(days_away^2), data = df_week2)
+summary(mod_rd22)
+
+
+
+mod_rd23 <- lm(score ~ after + days_away, data = df_week3)
+summary(mod_rd23)
+
+mod_rd24 <- lm(score ~ after + days_away + I(days_away^2), data = df_week3)
+summary(mod_rd24)
+
+stargazer(mod_rd23, mod_rd24)
+
+
+
+# daily estimate
+df22 <- df2 %>%
+  mutate(date = factor(date))
+mod07 <- lm(score~ date+no_regional_info + date*no_regional_info + rank, data = df22)
+
+summary(mod07)
+
+mod07$coefficients[59:113]
+
+
+dates <-unique(arrange(df2,date)$date)
+
+dates <- dates[-1]
+plotdf <- data.frame("date"= dates, "estimate" = mod07$coefficients[59:113])
+ggplot(plotdf, aes(x = date,y = estimate))+
+  geom_vline(xintercept = ymd("2022-04-28"),color ="red")+
+  geom_point()+
+  geom_smooth(method = 'glm')+
+  theme_bw()+
+  labs(y = "Daily Estimate")
+
+  
