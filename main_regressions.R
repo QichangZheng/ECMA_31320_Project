@@ -13,10 +13,13 @@ library(data.table)
 
 
 df <-read_csv("merged_data0524.csv")
+sumdf <- read_csv("summary.csv")
+
 
 df <- df %>%
   mutate(after = ifelse(date >ymd("2022-04-28"),1,0),
-         no_regional_info = ifelse(contains_keyword,0,1))
+         no_regional_info = ifelse(region_info,0,1),
+         week = floor_date(date, unit = "week"))
 
 # summary stat  
 stargazer(as.data.table(df))
@@ -91,32 +94,34 @@ summary(mod_rd5)
 stargazer(mod_rd1, mod_rd2, mod_rd3, mod_rd4, mod_rd5)
 
 
+
+
+
 ############## 
 ## PART II: DID
 ##############
-sumdf <- read_csv("summary.csv")
 
 df_with_control <- inner_join(sumdf, df)
 # April 22 + May 22
 df2 <- df_with_control %>%
   filter(date > ymd("2022-03-31") & date < ymd("2022-05-31"))%>%
-  mutate(post = ifelse(date >ymd("2022-04-28"),1,0),
+  mutate(after = ifelse(date >ymd("2022-04-28"),1,0),
          no_regional_info = ifelse(region_info,0,1))
 
 # Apr 22 + Apr 23
 df3 <- df_with_control %>%
   filter(date < ymd("2022-04-29") | date > ymd("2022-05-31"))%>%
-  mutate(post = ifelse(date >ymd("2022-04-28"),1,0),
+  mutate(after = ifelse(date >ymd("2022-04-28"),1,0),
          no_regional_info = ifelse(region_info,0,1))
 
-mod01 <- lm(score~ post+no_regional_info + post*no_regional_info, data = df2)
-mod02 <- lm(score~ post+no_regional_info + post*no_regional_info, data = df3)
+mod01 <- lm(score~ after+no_regional_info + after*no_regional_info, data = df2)
+mod02 <- lm(score~ after+no_regional_info + after*no_regional_info, data = df3)
 summary(mod01)
 summary(mod02)
 
 
-mod03 <- lm(score~ post+no_regional_info + post*no_regional_info + rank, data = df2)
-mod04 <- lm(score~ post+no_regional_info + post*no_regional_info + rank, data = df3)
+mod03 <- lm(score~ after+no_regional_info + after*no_regional_info + rank, data = df2)
+mod04 <- lm(score~ after+no_regional_info + after*no_regional_info + rank, data = df3)
 summary(mod03)
 summary(mod04)
 
@@ -134,23 +139,35 @@ stargazer(mod01, mod03, mod02, mod04, title="Regression Results",
 ## PART III: Robustness checks
 ##############
 
-# rdd placebo test
+# RD with regional  controls
+mod_rd01 <- lm(score ~ after + days_away + no_regional_info + no_regional_info*after, data = df_day)
+summary(mod_rd01)
 
-df_week2 <- df %>%
-  filter(date > ymd("2022-04-29") & date < ymd("2022-05-14"))%>%
-  mutate(after = ifelse(date > ymd("2022-05-06"),1,0),
-         days_away = as.numeric(date - ymd("2022-05-06")))
+mod_rd02 <- lm(score ~ after + days_away+ no_regional_info + no_regional_info*after, data = df_week)
+summary(mod_rd02)
+
+mod_rd03 <- lm(score ~ after + days_away + I(days_away^2)+ no_regional_info + no_regional_info*after, data = df_week)
+summary(mod_rd03)
+
+
+mod_rd04 <- lm(score ~ after + days_away+ no_regional_info + no_regional_info*after, data = df_month)
+summary(mod_rd04)
+
+mod_rd05 <- lm(score ~ after + days_away + I(days_away^2)+ no_regional_info + no_regional_info*after, data = df_month)
+summary(mod_rd05)
+
+stargazer(mod_rd01, mod_rd02, mod_rd03, mod_rd04, mod_rd05)
+
+
+
+# rdd placebo test
 
 
 df_week3 <- df %>%
   filter(date > ymd("2023-04-15") & date < ymd("2023-04-30"))%>%
   mutate(after = ifelse(date > ymd("2023-04-22"),1,0),
          days_away = as.numeric(date - ymd("2023-04-22")))
-mod_rd21 <- lm(score ~ after + days_away, data = df_week2)
-summary(mod_rd21)
 
-mod_rd22 <- lm(score ~ after + days_away + I(days_away^2), data = df_week2)
-summary(mod_rd22)
 
 
 
@@ -160,7 +177,13 @@ summary(mod_rd23)
 mod_rd24 <- lm(score ~ after + days_away + I(days_away^2), data = df_week3)
 summary(mod_rd24)
 
-stargazer(mod_rd23, mod_rd24)
+mod_rd25 <- lm(score ~ after + days_away +  no_regional_info + no_regional_info*after, data = df_week3)
+summary(mod_rd25)
+
+mod_rd26 <- lm(score ~ after + days_away + I(days_away^2)+ no_regional_info + no_regional_info*after, data = df_week3)
+summary(mod_rd26)
+
+stargazer(mod_rd23, mod_rd24, mod_rd25, mod_rd26)
 
 
 
@@ -185,4 +208,15 @@ ggplot(plotdf, aes(x = date,y = estimate))+
   theme_bw()+
   labs(y = "Daily Estimate")
 
-  
+# clustered standard errors
+
+clu01 <- felm(score~ after+no_regional_info + after*no_regional_info|0|0|week, data = df2)
+clu02 <- felm(score~ after+no_regional_info + after*no_regional_info+rank|0|0|week, data = df2)
+summary(clu01)
+summary(clu02)
+clu03 <- felm(score ~ after + days_away|0|0|week, data = df_week)
+clu04 <- felm(score ~ after + days_away + I(days_away^2)|0|0|week, data = df_week)
+summary(clu03)
+summary(clu04)
+
+stargazer(clu03, clu04, clu01, clu02)
